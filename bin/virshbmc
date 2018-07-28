@@ -46,8 +46,8 @@ def stream_callback(stream, events, console):
 class LibvirtBmc(bmc.Bmc):
     """A class to provide an IPMI interface to the VirtualBox APIs."""
 
-    def __init__(self, authdata, hypervisor, domain, port):
-        super(LibvirtBmc, self).__init__(authdata, port)
+    def __init__(self, authdata, hypervisor, domain, port, address):
+        super(LibvirtBmc, self).__init__(authdata, port=port, address=address)
         # Rely on libvirt to throw on bad data
         self.conn = libvirt.open(hypervisor)
         self.name = domain
@@ -146,6 +146,11 @@ if __name__ == '__main__':
                         dest='domain',
                         required=True,
                         help='The name of the domain to manage')
+    parser.add_argument('--address',
+                        dest='address',
+                        type=str,
+                        default='::',
+                        help='The address to bind')
     args = parser.parse_args()
 
     libvirt.virEventRegisterDefaultImpl()
@@ -154,5 +159,6 @@ if __name__ == '__main__':
     mybmc = LibvirtBmc({'admin': 'password'},
                        hypervisor=args.hypervisor,
                        domain=args.domain,
-                       port=args.port)
+                       port=args.port,
+                       address=args.address)
     mybmc.listen()
